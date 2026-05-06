@@ -3,61 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚡ Kalki Worker</title>
-  <link rel="manifest" href="manifest.json">
+  <meta name="description" content="Earn Kalki points by sharing your GPU for AI tasks">
+  <title>⚡ Kalki Worker – Earn Points</title>
+  <link rel="manifest" href="/manifest.json">
   <style>
-    :root { --primary: #2563eb; --success: #059669; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+    :root { --primary: #2563eb; --success: #059669; --danger: #b91c1c; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 800px; margin: 2em auto; padding: 1em; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 850px; margin: 2em auto; padding: 1em; }
     h1 { margin-bottom: 0.3em; color: var(--primary); }
     .card { background: var(--card); border-radius: 16px; padding: 1.5em; margin-bottom: 1.2em; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .points-display { font-size: 2.2em; font-weight: 700; color: var(--primary); }
-    .status { display: inline-block; padding: 0.3em 0.8em; border-radius: 20px; font-size: 0.9em; }
+    .points-display { font-size: 2.4em; font-weight: 700; color: var(--primary); }
+    .status-badge { display: inline-block; padding: 0.3em 1em; border-radius: 20px; font-size: 0.9em; }
     .status.idle { background: #e2e8f0; color: #475569; }
     .status.active { background: #dcfce7; color: var(--success); }
-    button { padding: 0.7em 1.5em; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
+    .status.error { background: #fee2e2; color: var(--danger); }
+    button { padding: 0.7em 1.5em; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-start { background: var(--success); color: white; }
-    .btn-stop { background: #b91c1c; color: white; }
-    .log { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 12px; font-family: monospace; font-size: 0.85em; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
-    input[type="text"], input[type="password"], input[type="number"] { width: 100%; padding: 0.7em; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1em; }
-    .config-row { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; margin-bottom: 0.8em; }
-    .config-row label { min-width: 100px; }
+    .btn-stop { background: var(--danger); color: white; }
+    .btn-config { background: var(--primary); color: white; }
+    .log-area { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 12px; font-family: monospace; font-size: 0.8em; max-height: 350px; overflow-y: auto; white-space: pre-wrap; }
+    input, select { padding: 0.6em; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1em; }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+    @media (max-width: 600px) { .config-grid { grid-template-columns: 1fr; } }
+    .config-item { display: flex; flex-direction: column; }
+    .config-item label { margin-bottom: 0.3em; font-weight: 600; font-size: 0.9em; }
+    .flex-row { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; }
+    a { color: var(--primary); }
   </style>
 </head>
 <body>
   <h1>⚡ Kalki Worker</h1>
+
+  <!-- Points & Status Card -->
   <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div><div class="points-display" id="totalPoints">0</div><div style="color:#64748b;">points earned</div></div>
-      <div><span class="status idle" id="statusBadge">IDLE</span></div>
+    <div class="flex-row" style="justify-content: space-between;">
+      <div>
+        <div class="points-display" id="totalPoints">0</div>
+        <div style="color:#64748b;">points earned</div>
+      </div>
+      <div><span class="status-badge idle" id="statusBadge">● IDLE</span></div>
     </div>
+    <div style="margin-top:0.8em; font-size:0.9em; color:#475569;" id="meshStatus"></div>
   </div>
+
+  <!-- Configuration Card -->
   <div class="card">
     <h2>🔧 Configuration</h2>
-    <div class="config-row">
-      <label>Target repo:</label>
-      <input type="text" id="repoOwner" placeholder="owner" style="width:150px;">
-      <span>/</span>
-      <input type="text" id="repoName" placeholder="repo" value="kalkicore" style="width:150px;">
+    <div class="config-grid">
+      <div class="config-item">
+        <label>Target Repo Owner</label>
+        <input type="text" id="repoOwner" placeholder="CodeWander-666" value="CodeWander-666">
+      </div>
+      <div class="config-item">
+        <label>Target Repo Name</label>
+        <input type="text" id="repoName" placeholder="kalkicore" value="kalkicore">
+      </div>
+      <div class="config-item" style="grid-column: span 2;">
+        <label>GitHub Personal Token (public_repo scope)</label>
+        <input type="password" id="ghToken" placeholder="ghp_...">
+        <small style="color:#64748b;">Create a classic token at <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings</a>.</small>
+      </div>
     </div>
-    <div class="config-row">
-      <label>GitHub token:</label>
-      <input type="password" id="ghToken" placeholder="ghp_..." style="flex:1;">
+    <div style="margin-top:1.2em;">
+      <button id="saveConfigBtn" class="btn-config">Save Configuration</button>
     </div>
-    <small style="color:#64748b;">Token needs <code>public_repo</code> scope. <a href="https://github.com/settings/tokens/new" target="_blank">Create one</a></small>
-    <div style="margin-top:1em;"><button id="saveConfigBtn">Save & Verify</button></div>
+    <div style="margin-top:0.5em; font-size:0.85em; color:var(--success); display:none;" id="configStatus">✔ Saved</div>
   </div>
+
+  <!-- Worker Control Card -->
   <div class="card">
-    <h2>📡 Worker Control</h2>
-    <div class="config-row"><label>Max parallel:</label><input type="number" id="concurrency" value="1" min="1" max="4" style="width:80px;"></div>
-    <button class="btn-start" id="startBtn">▶ Start Sharing GPU</button>
-    <button class="btn-stop" id="stopBtn" disabled>⏹ Stop</button>
+    <h2>📡 Worker</h2>
+    <div class="flex-row">
+      <label>Max concurrent tasks:</label>
+      <select id="concurrency">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+      <button class="btn-start" id="startBtn">▶ Start Sharing GPU</button>
+      <button class="btn-stop" id="stopBtn" disabled>⏹ Stop</button>
+    </div>
+    <div style="margin-top:1em; font-size:0.9em; color:#475569;" id="performanceInfo"></div>
   </div>
+
+  <!-- Activity Log Card -->
   <div class="card">
-    <h3>📋 Activity Log</h3>
-    <div class="log" id="logbox">Waiting…</div>
+    <div class="flex-row" style="justify-content:space-between;">
+      <h3>📋 Activity Log</h3>
+      <button onclick="document.getElementById('logbox').textContent=''" style="font-size:0.8em;">Clear</button>
+    </div>
+    <div class="log-area" id="logbox">Waiting for configuration…</div>
   </div>
+
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
