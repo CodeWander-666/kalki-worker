@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Kalki Worker</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root { --primary: #2563eb; --success: #059669; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 800px; margin: 2em auto; padding: 1em; }
+    h1 { margin-bottom: 0.3em; color: var(--primary); }
+    .card { background: var(--card); border-radius: 16px; padding: 1.5em; margin-bottom: 1.2em; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .points-display { font-size: 2.2em; font-weight: 700; color: var(--primary); }
+    .status { display: inline-block; padding: 0.3em 0.8em; border-radius: 20px; font-size: 0.9em; }
+    .status.idle { background: #e2e8f0; color: #475569; }
+    .status.active { background: #dcfce7; color: var(--success); }
+    button { padding: 0.7em 1.5em; font-size: 1em; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-start { background: var(--success); color: white; }
+    .btn-stop { background: #b91c1c; color: white; }
+    .log { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 12px; font-family: monospace; font-size: 0.85em; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+    input[type="text"], input[type="password"], input[type="number"] { width: 100%; padding: 0.7em; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1em; }
+    .config-row { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; margin-bottom: 0.8em; }
+    .config-row label { min-width: 100px; }
+  </style>
+</head>
+<body>
+  <h1>⚡ Kalki Worker</h1>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div><div class="points-display" id="totalPoints">0</div><div style="color:#64748b;">points earned</div></div>
+      <div><span class="status idle" id="statusBadge">IDLE</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>🔧 Configuration</h2>
+    <div class="config-row">
+      <label>Target repo:</label>
+      <input type="text" id="repoOwner" placeholder="owner" style="width:150px;">
+      <span>/</span>
+      <input type="text" id="repoName" placeholder="repo" value="kalkicore" style="width:150px;">
+    </div>
+    <div class="config-row">
+      <label>GitHub token:</label>
+      <input type="password" id="ghToken" placeholder="ghp_..." style="flex:1;">
+    </div>
+    <small style="color:#64748b;">Token needs <code>public_repo</code> scope. <a href="https://github.com/settings/tokens/new" target="_blank">Create one</a></small>
+    <div style="margin-top:1em;"><button id="saveConfigBtn">Save & Verify</button></div>
+  </div>
+  <div class="card">
+    <h2>📡 Worker Control</h2>
+    <div class="config-row"><label>Max parallel:</label><input type="number" id="concurrency" value="1" min="1" max="4" style="width:80px;"></div>
+    <button class="btn-start" id="startBtn">▶ Start Sharing GPU</button>
+    <button class="btn-stop" id="stopBtn" disabled>⏹ Stop</button>
+  </div>
+  <div class="card">
+    <h3>📋 Activity Log</h3>
+    <div class="log" id="logbox">Waiting…</div>
+  </div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
